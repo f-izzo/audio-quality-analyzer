@@ -33,21 +33,6 @@ python audio_quality_metrics.py test_audio.wav --reference clean_audio.wav
 python audio_quality_metrics.py audio.wav --output my_results.json --sample-rate 22050
 ```
 
-### Programmatic Usage
-
-```python
-from audio_quality_metrics import AudioQualityAnalyzer
-
-# Single audio analysis
-analyzer = AudioQualityAnalyzer("audio.wav")
-results = analyzer.analyze_all()
-analyzer.save_results("results.json")
-
-# With reference audio
-analyzer = AudioQualityAnalyzer("test.wav", reference_path="clean.wav")
-results = analyzer.analyze_all()
-```
-
 ## Supported Metrics
 
 ### Basic Audio Features
@@ -203,33 +188,51 @@ Results are saved as JSON with the following structure:
 
 ## Example Demo
 
-Run the example with generated sample audio:
+You can now run the example usage script with flexible command line options:
 
 ```bash
-python example_usage.py
+# Run the demo with generated sample audio
+python example_usage.py --demo
+
+# Run hardcoded examples (single and comparison)
+python example_usage.py --examples
+
+# Analyze a single audio file
+python example_usage.py --test data/1_hindi.m4a
+
+# Compare test audio with reference
+python example_usage.py --test data/1_hindi.m4a --reference data/1_marathi.m4a
+
+# Specify custom output file
+python example_usage.py --test data/1_hindi.m4a --output my_results.json
 ```
 
-This will:
-1. Create sample clean and noisy audio files
-2. Run all available metrics
-3. Save results to `demo_metrics.json`
-4. Print a summary of key metrics
+**Flags:**
+- `--demo`: Generates sample audio files and runs a full demo analysis.
+- `--examples`: Runs hardcoded example analyses (single and comparison).
+- `--test <file>`: Path to test audio file for analysis.
+- `--reference <file>`: Path to reference audio file for comparison metrics.
+- `--output <file>`: Output JSON file path (overrides other output flags).
+- `--output-single <file>`: Output file for single audio analysis.
+- `--output-compare <file>`: Output file for comparison analysis.
 
-## Extending the Tool
+If no arguments are provided, usage help will be shown.
 
-To add new metrics:
+---
 
-1. Add a new method to `AudioQualityAnalyzer` class
-2. Call it from `analyze_all()` method
-3. Handle errors gracefully with try/except
+The previous example usage section is now replaced by the above CLI options. For programmatic usage, see below:
 
-Example:
+### Programmatic Usage
+
 ```python
-def calculate_new_metric(self):
-    try:
-        # Your metric calculation here
-        result = some_metric_function(self.audio)
-        self.results['new_metric'] = {'value': float(result)}
-    except Exception as e:
-        self.results['new_metric'] = {'error': str(e)}
+from audio_quality_metrics import AudioQualityAnalyzer
+
+# Single audio analysis
+analyzer = AudioQualityAnalyzer("audio.wav")
+results = analyzer.analyze_all()
+analyzer.save_results("results.json")
+
+# With reference audio
+analyzer = AudioQualityAnalyzer("test.wav", reference_path="clean.wav")
+results = analyzer.analyze_all()
 ```

@@ -8,6 +8,8 @@ both programmatically and from command line.
 
 from audio_quality_metrics import AudioQualityAnalyzer
 import json
+import argparse
+import sys
 
 def example_usage():
     """Example of programmatic usage"""
@@ -136,18 +138,116 @@ def demo_with_sample_audio():
         if 'log_spectral_distance' in spectral:
             print(f"Log-Spectral Distance: {spectral['log_spectral_distance']:.4f}")
 
+def run_cli_analysis(args):
+    """Run analysis based on command line arguments"""
+    try:
+        analyzer = AudioQualityAnalyzer(
+            audio_path=args.test,
+            reference_path=args.reference,
+            sample_rate=16000
+        )
+        
+        results = analyzer.analyze_all()
+        
+        # Determine output filename
+        if args.reference:
+            # Comparison analysis
+            output_file = args.output_compare or "comparison_metrics.json"
+            print("=== Audio vs Reference Analysis ===")
+            
+            # Print comparison metrics
+            if 'pesq_stoi' in results and 'error' not in results['pesq_stoi']:
+                print(f"PESQ Score: {results['pesq_stoi'].get('pesq_wideband', 'N/A')}")
+                print(f"STOI Score: {results['pesq_stoi'].get('stoi', 'N/A'):.4f}")
+            
+            if 'spectral_distances' in results:
+                if 'log_spectral_distance' in results['spectral_distances']:
+                    print(f"Log-Spectral Distance: {results['spectral_distances']['log_spectral_distance']:.4f}")
+        else:
+            # Single audio analysis
+            output_file = args.output_single or "single_audio_metrics.json"
+            print("=== Single Audio Analysis ===")
+            
+            # Print key metrics
+            print(f"Duration: {results['metadata']['audio_duration_seconds']:.2f} seconds")
+            if 'basic_metrics' in results:
+                print(f"RMS Energy: {results['basic_metrics']['rms_energy_mean']:.4f}")
+            if 'signal_quality' in results:
+                print(f"SNR Estimate: {results['signal_quality']['snr_estimate_db']:.2f} dB")
+        
+        # Use --output flag if provided, otherwise use default
+        if args.output:
+            output_file = args.output
+        
+        analyzer.save_results(output_file)
+        print(f"\nResults saved to: {output_file}")
+        
+    except Exception as e:
+        print(f"Error analyzing audio: {e}")
+        sys.exit(1)
+
+def main():
+    """Main function to handle command line arguments"""
+    parser = argparse.ArgumentParser(
+        description='Audio Quality Metrics Calculator',
+        formatter_class=argparse.RawDescriptionHelpFormatter,
+        epilog="""
+Examples:
+  %(prog)s --test audio.wav --output-single single_results.json
+  %(prog)s --test audio.wav --reference clean.wav --output-compare comparison.json
+  %(prog)s --test audio.wav --reference clean.wav --output results.json
+  %(prog)s --demo
+        """
+    )
+    
+    parser.add_argument('--test', 
+                       help='Path to test audio file', 
+                       metavar='FILE')
+    
+    parser.add_argument('--reference', 
+                       help='Path to reference audio file (for comparison)', 
+                       metavar='FILE')
+    
+    parser.add_argument('--output', 
+                       help='Output JSON file path (overrides other output flags)', 
+                       metavar='FILE')
+    
+    parser.add_argument('--output-single', 
+                       help='Output file for single audio analysis (default: single_audio_metrics.json)', 
+                       metavar='FILE')
+    
+    parser.add_argument('--output-compare', 
+                       help='Output file for comparison analysis (default: comparison_metrics.json)', 
+                       metavar='FILE')
+    
+    parser.add_argument('--demo', 
+                       action='store_true',
+                       help='Run demo with generated sample audio')
+    
+    parser.add_argument('--examples', 
+                       action='store_true',
+                       help='Run hardcoded examples')
+    
+    args = parser.parse_args()
+    
+    # If no arguments provided, show help
+    if len(sys.argv) == 1:
+        parser.print_help()
+        return
+    
+    if args.demo:
+        demo_with_sample_audio()
+    elif args.examples:
+        example_usage()
+    elif args.test:
+        run_cli_analysis(args)
+    else:
+        print("Error: --test argument is required for analysis")
+        parser.print_help()
+        sys.exit(1)
+
 if __name__ == "__main__":
     print("Audio Quality Metrics - Example Usage")
     print("====================================")
     
-    # Uncomment the example you want to run:
-    
-    # Option 1: Run with your own audio files
-    example_usage()
-    
-    # Option 2: Create sample audio and run demo
-    # demo_with_sample_audio()
-    
-    print("\nCommand line usage examples:")
-    print("python audio_quality_metrics.py audio.wav")
-    print("python audio_quality_metrics.py test.wav --reference clean.wav --output results.json")
+    main()
