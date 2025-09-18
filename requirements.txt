@@ -1,0 +1,22 @@
+# Core audio processing libraries
+librosa>=0.10.0
+soundfile>=0.12.0
+numpy>=1.21.0
+scipy>=1.7.0
+scikit-learn>=1.0.0
+
+# Deep learning frameworks
+torch>=1.9.0
+torchaudio>=0.9.0
+
+# Perceptual quality metrics
+pesq>=0.0.3
+pystoi>=0.3.3
+
+# Optional advanced metrics (may require additional setup)
+# speechmetrics>=1.0.0  # Package not available, commented out
+transformers>=4.20.0
+
+# For specific deep learning metrics (install as needed)
+# speechbrain  # For more advanced metrics
+# fairseq     # For some specific models
