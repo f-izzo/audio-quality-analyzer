@@ -1,0 +1,14 @@
+[project]
+name = "audio-quality-analyzer"
+version = "0.1.0"
+description = "A comprehensive Python tool for calculating ML/AI-based audio quality metrics."
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "librosa>=0.10.0",
+    "numpy>=1.21.0",
+    "pesq>=0.0.3",
+    "pystoi>=0.3.3",
+]
+[tool.setuptools]
+py-modules = ["audio_quality_metrics"]
